@@ -30,9 +30,6 @@ public class LoginController {
     @Autowired
     private UserDetailsService userService;
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
-
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -51,12 +48,12 @@ public class LoginController {
         } catch (UsernameNotFoundException ex) { }
 
         if (user == null) {
-            model.addAttribute("loginError", "Username not found!");
+            model.addAttribute("loginError", "Username not found");
             return "login";
         }
 
         if (password == null || !password.equals(user.getPassword())) {
-            model.addAttribute("loginError", "Wrong password!");
+            model.addAttribute("loginError", "Wrong password");
             return "login";
         }
 

@@ -28,7 +28,6 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 @Controller
 public class LoginController {
 
-    private static final String LOGIN_ERROR_MSG = "Incorrect user/password!";
     private static final String LOGIN_ERROR_ATTR = "loginError";
 
     @Autowired
@@ -57,14 +56,14 @@ public class LoginController {
         } catch (UsernameNotFoundException ex) { }
 
         if (user == null) {
-            model.addAttribute(LOGIN_ERROR_ATTR, LOGIN_ERROR_MSG);
+            model.addAttribute(LOGIN_ERROR_ATTR, "Incorrect user/password!");
             long endTime = System.nanoTime();
             log.info("Authentication end - Duration = {} ms", (double)(endTime - startTime)/1000000);
             return "login";
         }
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            model.addAttribute(LOGIN_ERROR_ATTR, LOGIN_ERROR_MSG);
+            model.addAttribute(LOGIN_ERROR_ATTR, "Incorrect user/password!");
             long endTime = System.nanoTime();
             log.info("Authentication end - Duration = {} ms", (double)(endTime - startTime)/1000000);
             return "login";

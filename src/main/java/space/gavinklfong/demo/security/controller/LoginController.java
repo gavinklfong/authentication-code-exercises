@@ -40,12 +40,10 @@ public class LoginController {
 
     @PostMapping("/authenticate")
     public String loginProcess(HttpServletRequest req, @ModelAttribute("loginForm") LoginForm loginForm, Model model) {
-        log.info("username = {}", loginForm.getUsername());
-
         String username = loginForm.getUsername();
         String password = loginForm.getPassword();
 
-        log.info("authenicate() - user={}, password={}", loginForm.getUsername(), loginForm.getPassword());
+        log.info("Authenication start - user = {}", loginForm.getUsername());
         UserDetails user = null;
 
         try {
@@ -53,12 +51,12 @@ public class LoginController {
         } catch (UsernameNotFoundException ex) { }
 
         if (user == null) {
-            model.addAttribute("loginError", "Username not found.");
+            model.addAttribute("loginError", "Username not found!");
             return "login";
         }
 
         if (password == null || !password.equals(user.getPassword())) {
-            model.addAttribute("loginError", "Wrong password");
+            model.addAttribute("loginError", "Wrong password!");
             return "login";
         }
 
@@ -71,7 +69,13 @@ public class LoginController {
         HttpSession session = req.getSession(true);
         session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
 
-        return "redirect:/user";
+        if (authorities.stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_USER"))) {
+            return "redirect:/user";
+        } else if (authorities.stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
+            return "redirect:/admin";
+        } else {
+            return "redirect:/";
+        }
     }
 
 }

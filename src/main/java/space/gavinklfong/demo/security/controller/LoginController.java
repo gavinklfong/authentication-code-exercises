@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import space.gavinklfong.demo.security.dto.LoginForm;
+import space.gavinklfong.demo.security.model.LoginAttempt;
+import space.gavinklfong.demo.security.repository.LoginAttemptRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.Instant;
 import java.util.Collection;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
@@ -39,6 +42,9 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private LoginAttemptRepository loginAttemptRepo;
+
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -50,6 +56,8 @@ public class LoginController {
 
         String username = loginForm.getUsername();
         String password = loginForm.getPassword();
+
+        loginAttemptRepo.save(LoginAttempt.builder().loginTime(Instant.now()).ipAddress(req.getRemoteAddr()).username(username).build());
 
         log.info("Authentication start - User = {}", loginForm.getUsername());
         UserDetails user = null;
@@ -98,4 +106,34 @@ public class LoginController {
 
         return nextPage;
     }
+
+
+//    private void checkIPofUserIsBlocked() {
+//        String remoteAddr = request.getRemoteAddr();
+//        if (loginAttemptService.isBlocked(remoteAddr)) {
+//            log.warn(remoteAddr + " is blocked");
+//            throw new UsernameNotFoundException(Messages.Error.INVALID_CREDENTIALS);
+//        }
+//    }
+//
+//    private void checkBruteForce(User user) {
+//        List<UserLoginDate> userLoginDates =
+//                userLoginDateService.getFirstUserLoginDate(
+//                        numberOfAttempts,
+//                        user);
+//        long serverTime = LocalDateTime.now().atZone(
+//                ZoneId.systemDefault()).toInstant().toEpochMilli();
+//        long blockingTimeInMillis = TimeUnit.MINUTES.toMillis(lockTimeUserMinutes);
+//        long unsuccessfulUserEntriesPerTime =
+//                userLoginDates.stream().filter(item ->
+//                        !item.isSuccessfulLogin()
+//                                && serverTime - item.getLoginDate().getTime()
+//                                < blockingTimeInMillis).count();
+//
+//        if (unsuccessfulUserEntriesPerTime >= numberOfAttempts) {
+//            log.warn(String.format(Messages.Log.PASSWORD_BRUTE_FORCE, user.getId()));
+//            throw new UsernameNotFoundException(Messages.Error.INVALID_CREDENTIALS);
+//        }
+//    }
+//}
 }

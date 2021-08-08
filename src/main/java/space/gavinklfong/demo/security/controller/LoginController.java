@@ -28,6 +28,9 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 @Controller
 public class LoginController {
 
+    private static final String LOGIN_ERROR_MSG = "Incorrect user / password";
+    private static final String LOGIN_ERROR_ATTR = "loginError";
+
     @Autowired
     private UserDetailsService userService;
 
@@ -41,8 +44,6 @@ public class LoginController {
 
     @PostMapping("/authenticate")
     public String loginProcess(HttpServletRequest req, @ModelAttribute("loginForm") LoginForm loginForm, Model model) {
-        log.info("username = {}", loginForm.getUsername());
-
         String username = loginForm.getUsername();
         String password = loginForm.getPassword();
 
@@ -54,12 +55,12 @@ public class LoginController {
         } catch (UsernameNotFoundException ex) { }
 
         if (user == null) {
-            model.addAttribute("loginError", "Username not found");
+            model.addAttribute(LOGIN_ERROR_ATTR, LOGIN_ERROR_MSG);
             return "login";
         }
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            model.addAttribute("loginError", "Wrong password");
+            model.addAttribute(LOGIN_ERROR_ATTR, LOGIN_ERROR_MSG);
             return "login";
         }
 
@@ -79,6 +80,5 @@ public class LoginController {
         } else {
             return "redirect:/";
         }
-
     }
 }

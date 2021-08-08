@@ -41,12 +41,11 @@ public class LoginController {
 
     @PostMapping("/authenticate")
     public String loginProcess(HttpServletRequest req, @ModelAttribute("loginForm") LoginForm loginForm, Model model) {
-        log.info("username = {}", loginForm.getUsername());
 
         String username = loginForm.getUsername();
         String password = loginForm.getPassword();
 
-        log.info("authenicate() - user={}, password={}", loginForm.getUsername(), loginForm.getPassword());
+        log.info("Authenication start - user = {}", loginForm.getUsername());
         UserDetails user = null;
 
         try {

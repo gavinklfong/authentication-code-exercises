@@ -31,6 +31,8 @@ public class LoginController {
     private static final String LOGIN_ERROR_MSG = "Incorrect user / password";
     private static final String LOGIN_ERROR_ATTR = "loginError";
 
+    private static final String DUMMY_PASSWORD_HASH = "$argon2id$v=19$m=4096,t=10,p=1$SD8m0Rk28mlhyVm688wIRA$9ltWxKhQTrD0MKK3tSNHrKyHjkR9dH//nLa6LlD8MHI";
+
     @Autowired
     private UserDetailsService userService;
 
@@ -44,10 +46,12 @@ public class LoginController {
 
     @PostMapping("/authenticate")
     public String loginProcess(HttpServletRequest req, @ModelAttribute("loginForm") LoginForm loginForm, Model model) {
+        long startTime = System.nanoTime();
+
         String username = loginForm.getUsername();
         String password = loginForm.getPassword();
 
-        log.info("authenicate() - user={}, password={}", loginForm.getUsername(), loginForm.getPassword());
+        log.info("Authentication start - User = {}", loginForm.getUsername());
         UserDetails user = null;
 
         try {
@@ -55,12 +59,20 @@ public class LoginController {
         } catch (UsernameNotFoundException ex) { }
 
         if (user == null) {
+
+            // dummy step to make the response time similar to the case of incorrect password
+            passwordEncoder.matches(password, DUMMY_PASSWORD_HASH);
+
             model.addAttribute(LOGIN_ERROR_ATTR, LOGIN_ERROR_MSG);
+            long endTime = System.nanoTime();
+            log.info("Authentication end - Duration = {} ms", (double)(endTime - startTime)/1000000);
             return "login";
         }
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             model.addAttribute(LOGIN_ERROR_ATTR, LOGIN_ERROR_MSG);
+            long endTime = System.nanoTime();
+            log.info("Authentication end - Duration = {} ms", (double)(endTime - startTime)/1000000);
             return "login";
         }
 
@@ -73,12 +85,17 @@ public class LoginController {
         HttpSession session = req.getSession(true);
         session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
 
+        String nextPage = "redirect:/";
+
         if (authorities.stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_USER"))) {
-            return "redirect:/user";
+            nextPage = "redirect:/user";
         } else if (authorities.stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
-            return "redirect:/admin";
-        } else {
-            return "redirect:/";
+            nextPage = "redirect:/admin";
         }
+
+        long endTime = System.nanoTime();
+        log.info("Authentication end - Duration = {} ms", (double)(endTime - startTime)/1000000);
+
+        return nextPage;
     }
 }

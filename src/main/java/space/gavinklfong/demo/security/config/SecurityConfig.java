@@ -21,7 +21,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final int PASSWORD_ENCODER_HASH_LENGTH = 32;
     private static final int PASSWORD_ENCODER_PARALLELISM = 1;
     private static final int PASSWORD_ENCODER_MEMORY = 1 << 12;
-    private static final int PASSWORD_ENCODER_ITERATIONS = 3;
+    private static final int PASSWORD_ENCODER_ITERATIONS = 10;
 
     @Autowired
     private DataSource datasource;

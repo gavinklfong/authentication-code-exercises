@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,8 +31,8 @@ public class LoginController {
     @Autowired
     private UserDetailsService userService;
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
     public String login() {
@@ -53,11 +54,11 @@ public class LoginController {
         } catch (UsernameNotFoundException ex) { }
 
         if (user == null) {
-            model.addAttribute("loginError", "Username not found.");
+            model.addAttribute("loginError", "Username not found");
             return "login";
         }
 
-        if (password == null || !password.equals(user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             model.addAttribute("loginError", "Wrong password");
             return "login";
         }
@@ -71,7 +72,13 @@ public class LoginController {
         HttpSession session = req.getSession(true);
         session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
 
-        return "redirect:/user";
-    }
+        if (authorities.stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_USER"))) {
+            return "redirect:/user";
+        } else if (authorities.stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
+            return "redirect:/admin";
+        } else {
+            return "redirect:/";
+        }
 
+    }
 }

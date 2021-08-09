@@ -14,8 +14,6 @@ import java.util.Optional;
 @Service
 public class ReCaptchaService {
 
-    private static final String URL = "https://www.google.com/recaptcha/api/siteverify";
-
     private String secret;
 
     private WebClient webClient;
@@ -42,6 +40,4 @@ public class ReCaptchaService {
             return false;
         }
     }
-
-
 }

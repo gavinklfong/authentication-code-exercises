@@ -30,7 +30,7 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 @Controller
 public class LoginController {
 
-    private static final String LOGIN_ERROR_MSG = "Incorrect user / password";
+    private static final String LOGIN_ERROR_MSG = "Incorrect user/password";
     private static final String LOGIN_ERROR_ATTR = "loginError";
 
     private static final String DUMMY_PASSWORD_HASH = "$argon2id$v=19$m=4096,t=10,p=1$SD8m0Rk28mlhyVm688wIRA$9ltWxKhQTrD0MKK3tSNHrKyHjkR9dH//nLa6LlD8MHI";

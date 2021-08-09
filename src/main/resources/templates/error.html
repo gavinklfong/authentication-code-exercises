@@ -4,10 +4,13 @@
         <title>Error page</title>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="css/main.css" th:href="@{/css/main.css}" />
+        <script src="/webjars/jquery/jquery.min.js"></script>
+        <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+        <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     </head>
     <body th:with="httpStatus=${T(org.springframework.http.HttpStatus).valueOf((#response != null)? #response.status : 500)}">
         <h1 th:text="|${httpStatus} - ${httpStatus.reasonPhrase}|">404</h1>
         <p th:utext="${errorMessage}">Error java.lang.NullPointerException</p>
-        <a href="index" th:href="@{/index}">Back to Home Page</a>
+        <a href="/" th:href="@{/}">Back to Home Page</a>
     </body>
 </html>

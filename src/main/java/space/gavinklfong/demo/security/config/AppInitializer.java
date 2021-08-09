@@ -22,7 +22,5 @@ public class AppInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        log.info(passwordEncoder.encode("DUMMY PASSWORD"));
-
     }
 }

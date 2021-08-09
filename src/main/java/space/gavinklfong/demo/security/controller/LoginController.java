@@ -44,7 +44,7 @@ public class LoginController {
         return "login";
     }
 
-    @PostMapping("/authenticate")
+    @PostMapping("/login")
     public String loginProcess(HttpServletRequest req, @ModelAttribute("loginForm") LoginForm loginForm, Model model) {
         long startTime = System.nanoTime();
 

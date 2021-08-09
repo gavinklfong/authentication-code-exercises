@@ -2,6 +2,7 @@ package space.gavinklfong.demo.security.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,8 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import space.gavinklfong.demo.security.dto.LoginForm;
-import space.gavinklfong.demo.security.model.LoginAttempt;
-import space.gavinklfong.demo.security.repository.LoginAttemptRepository;
+import space.gavinklfong.demo.security.service.ReCaptchaService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -31,7 +31,7 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 @Controller
 public class LoginController {
 
-    private static final String LOGIN_ERROR_MSG = "Incorrect user / password";
+    private static final String LOGIN_ERROR_MSG = "Incorrect user/password";
     private static final String LOGIN_ERROR_ATTR = "loginError";
 
     private static final String DUMMY_PASSWORD_HASH = "$argon2id$v=19$m=4096,t=10,p=1$SD8m0Rk28mlhyVm688wIRA$9ltWxKhQTrD0MKK3tSNHrKyHjkR9dH//nLa6LlD8MHI";
@@ -43,21 +43,29 @@ public class LoginController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private LoginAttemptRepository loginAttemptRepo;
+    private ReCaptchaService reCaptchaService;
+
+    @Value("${app.recaptcha.site-key")
+    private String reCaptchaSiteKey;
 
     @GetMapping("/login")
-    public String login() {
+    public String login(Model model) {
         return "login";
     }
 
-    @PostMapping("/authenticate")
+    @PostMapping("/login")
     public String loginProcess(HttpServletRequest req, @ModelAttribute("loginForm") LoginForm loginForm, Model model) {
         long startTime = System.nanoTime();
 
         String username = loginForm.getUsername();
         String password = loginForm.getPassword();
 
-        loginAttemptRepo.save(LoginAttempt.builder().loginTime(Instant.now()).ipAddress(req.getRemoteAddr()).username(username).build());
+        String reCaptchaToken = req.getParameter("g-recaptcha-response");
+        if (!reCaptchaService.verifyReCaptchaResponse(reCaptchaToken)) {
+            log.warn("login failed - suspected automated attack - ip={}, user={}", req.getRemoteAddr(), username);
+            model.addAttribute(LOGIN_ERROR_ATTR, "sorry, seem like you are a robot");
+            return "login";
+        }
 
         log.info("Authentication start - User = {}", loginForm.getUsername());
         UserDetails user = null;
@@ -67,6 +75,7 @@ public class LoginController {
         } catch (UsernameNotFoundException ex) { }
 
         if (user == null) {
+            log.warn("login failed - unknown user - ip={}, user={}", req.getRemoteAddr(), username);
 
             // dummy step to make the response time similar to the case of incorrect password
             passwordEncoder.matches(password, DUMMY_PASSWORD_HASH);
@@ -78,11 +87,14 @@ public class LoginController {
         }
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
+            log.warn("login failed - incorrect password - ip={}, user={}", req.getRemoteAddr(), username);
             model.addAttribute(LOGIN_ERROR_ATTR, LOGIN_ERROR_MSG);
             long endTime = System.nanoTime();
             log.info("Authentication end - Duration = {} ms", (double)(endTime - startTime)/1000000);
             return "login";
         }
+
+        log.info("successful login - ip={}, user={}", req.getRemoteAddr(), username);
 
         // set up login session
         Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
@@ -106,34 +118,4 @@ public class LoginController {
 
         return nextPage;
     }
-
-
-//    private void checkIPofUserIsBlocked() {
-//        String remoteAddr = request.getRemoteAddr();
-//        if (loginAttemptService.isBlocked(remoteAddr)) {
-//            log.warn(remoteAddr + " is blocked");
-//            throw new UsernameNotFoundException(Messages.Error.INVALID_CREDENTIALS);
-//        }
-//    }
-//
-//    private void checkBruteForce(User user) {
-//        List<UserLoginDate> userLoginDates =
-//                userLoginDateService.getFirstUserLoginDate(
-//                        numberOfAttempts,
-//                        user);
-//        long serverTime = LocalDateTime.now().atZone(
-//                ZoneId.systemDefault()).toInstant().toEpochMilli();
-//        long blockingTimeInMillis = TimeUnit.MINUTES.toMillis(lockTimeUserMinutes);
-//        long unsuccessfulUserEntriesPerTime =
-//                userLoginDates.stream().filter(item ->
-//                        !item.isSuccessfulLogin()
-//                                && serverTime - item.getLoginDate().getTime()
-//                                < blockingTimeInMillis).count();
-//
-//        if (unsuccessfulUserEntriesPerTime >= numberOfAttempts) {
-//            log.warn(String.format(Messages.Log.PASSWORD_BRUTE_FORCE, user.getId()));
-//            throw new UsernameNotFoundException(Messages.Error.INVALID_CREDENTIALS);
-//        }
-//    }
-//}
 }

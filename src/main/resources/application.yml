@@ -16,3 +16,10 @@ spring:
       settings:
         trace: false
         web-allow-others: false
+
+app:
+  recaptcha:
+    verify-url: https://www.google.com/recaptcha/api/siteverify
+    site-key: 6Ldufe0bAAAAAMx3PosmxqC18F65Q-JbzEpEQUei
+    secret-key: 6Ldufe0bAAAAAPRPPuKipUbZ8xSudQ_3fmdbyMq5
+

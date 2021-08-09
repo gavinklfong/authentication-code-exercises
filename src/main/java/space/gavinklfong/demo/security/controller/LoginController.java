@@ -2,6 +2,7 @@ package space.gavinklfong.demo.security.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import space.gavinklfong.demo.security.dto.LoginForm;
+import space.gavinklfong.demo.security.service.ReCaptchaService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -39,14 +41,26 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ReCaptchaService reCaptchaService;
+
+    @Value("${app.recaptcha.site-key")
+    private String reCaptchaSiteKey;
+
     @GetMapping("/login")
-    public String login() {
+    public String login(Model model) {
         return "login";
     }
 
-    @PostMapping("/authenticate")
+    @PostMapping("/login")
     public String loginProcess(HttpServletRequest req, @ModelAttribute("loginForm") LoginForm loginForm, Model model) {
         long startTime = System.nanoTime();
+
+        String reCaptchaToken = req.getParameter("g-recaptcha-response");
+        if (!reCaptchaService.verifyReCaptchaResponse(reCaptchaToken)) {
+            model.addAttribute(LOGIN_ERROR_ATTR, "sorry, seem like you are a robot");
+            return "login";
+        }
 
         String username = loginForm.getUsername();
         String password = loginForm.getPassword();

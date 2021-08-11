@@ -12,15 +12,15 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class ReCaptchaService {
+public class CaptchaService {
 
     private String secret;
 
     private WebClient webClient;
 
     @Autowired
-    public ReCaptchaService(@Value("${app.recaptcha.verify-url}") String verifyUrl,
-                            @Value("${app.recaptcha.secret-key}") String secret) {
+    public CaptchaService(@Value("${app.recaptcha.verify-url}") String verifyUrl,
+                          @Value("${app.recaptcha.secret-key}") String secret) {
         this.webClient = WebClient.builder().baseUrl(verifyUrl).build();
         this.secret = secret;
     }

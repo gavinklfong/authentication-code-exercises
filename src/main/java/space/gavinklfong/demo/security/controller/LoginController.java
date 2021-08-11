@@ -18,11 +18,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import space.gavinklfong.demo.security.dto.LoginForm;
-import space.gavinklfong.demo.security.service.ReCaptchaService;
+import space.gavinklfong.demo.security.service.CaptchaService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.time.Instant;
 import java.util.Collection;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
@@ -43,7 +42,7 @@ public class LoginController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private ReCaptchaService reCaptchaService;
+    private CaptchaService captchaService;
 
     @Value("${app.recaptcha.site-key")
     private String reCaptchaSiteKey;
@@ -61,7 +60,7 @@ public class LoginController {
         String password = loginForm.getPassword();
 
         String reCaptchaToken = req.getParameter("g-recaptcha-response");
-        if (!reCaptchaService.verifyReCaptchaResponse(reCaptchaToken)) {
+        if (!captchaService.verifyReCaptchaResponse(reCaptchaToken)) {
             log.warn("login failed - suspected automated attack - ip={}, user={}", req.getRemoteAddr(), username);
             model.addAttribute(LOGIN_ERROR_ATTR, "sorry, seem like you are a robot");
             return "login";

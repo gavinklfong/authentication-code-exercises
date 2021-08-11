@@ -63,8 +63,41 @@
         </div>
     </div>
 
-    <p><a href="/" th:href="@{/}">Back to home page</a></p>
-
-</div>
+    <div class="mb-3 row">
+        <p><a href="/" th:href="@{/}">Back to home page</a></p>
+    </div>
+    <div class="mb-3 row">
+        <div class="col">
+            You can login using the following user Id / password:
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">User Id</th>
+                    <th scope="col">Password</th>
+                    <th scope="col">Role</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row">admin</th>
+                    <td>demo</td>
+                    <td>ADMIN</td>
+                </tr>
+                <tr>
+                    <th scope="row">user1</td>
+                    <td>demo</td>
+                    <td>USER</td>
+                </tr>
+                <tr>
+                    <th scope="row">user2</td>
+                    <td>demo</td>
+                    <td>USER</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+        </div>
+    </div>
 </body>
 </html>

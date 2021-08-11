@@ -62,7 +62,7 @@ public class LoginController {
         String reCaptchaToken = req.getParameter("g-recaptcha-response");
         if (!captchaService.verifyReCaptchaResponse(reCaptchaToken)) {
             log.warn("login failed - suspected automated attack - ip={}, user={}", req.getRemoteAddr(), username);
-            model.addAttribute(LOGIN_ERROR_ATTR, "sorry, seem like you are a robot");
+            model.addAttribute(LOGIN_ERROR_ATTR, LOGIN_ERROR_MSG);
             return "login";
         }
 

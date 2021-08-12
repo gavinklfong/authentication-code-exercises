@@ -1,4 +1,4 @@
-# Secure Coding Exercise
+# Secure Coding Exercises
 
 This is a sample Spring Boot application with a simple login flow. The purpose of this repository is to serve as a set of exercises for anyone to practice the concepts of secure coding by implementing security control in the authentication logic.
 
